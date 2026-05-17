@@ -33,6 +33,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <LinearLayout
+        android:id="@+id/intervalGoalRow"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -40,6 +41,7 @@
         android:baselineAligned="false">
 
         <LinearLayout
+            android:id="@+id/intervalWrapper"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"

@@ -4,8 +4,11 @@ import android.content.Context
 import android.content.DialogInterface
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.view.WindowManager
 import android.widget.AdapterView
+import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.widget.addTextChangedListener
@@ -89,6 +92,33 @@ class CounterSettingsDialogBuilder(private val context: Context, private val vie
 
         builder.setPositiveButton(R.string.save, null)
         builder.setNegativeButton(R.string.cancel, null)
+
+        binding.intervalGoalRow.viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
+            override fun onPreDraw(): Boolean {
+                val row = binding.intervalGoalRow
+                if (row.width <= 0) return true
+                row.viewTreeObserver.takeIf { it.isAlive }?.removeOnPreDrawListener(this)
+
+                val intervalActual = binding.intervalWrapper.width
+                val goalActual = binding.goalInputBox.width
+
+                val unspec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+                binding.intervalWrapper.measure(unspec, unspec)
+                binding.goalInputBox.measure(unspec, unspec)
+                val intervalWrap = binding.intervalWrapper.measuredWidth
+                val goalWrap = binding.goalInputBox.measuredWidth
+
+                val squeezed = intervalActual < intervalWrap || goalActual < goalWrap
+                if (!squeezed) return true
+
+                row.orientation = LinearLayout.VERTICAL
+                val goalLp = binding.goalInputBox.layoutParams as ViewGroup.MarginLayoutParams
+                goalLp.topMargin = goalLp.marginStart
+                goalLp.marginStart = 0
+                binding.goalInputBox.layoutParams = goalLp
+                return false
+            }
+        })
     }
 
     private fun updateGoalText() {
