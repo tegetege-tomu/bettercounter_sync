@@ -18,7 +18,6 @@ fun Calendar.truncated(field: Int): Calendar {
         cal.add(Calendar.DAY_OF_YEAR, -1)
     }
     cal.set(Calendar.HOUR_OF_DAY, firstHourOfDay)
-    cal.debugToSimpleDateString().andLog()
     if (field in listOf(Calendar.DATE, Calendar.DAY_OF_WEEK, Calendar.DAY_OF_MONTH, Calendar.DAY_OF_YEAR)) return cal
     if (field in listOf(Calendar.WEEK_OF_YEAR, Calendar.WEEK_OF_MONTH)) {
         val dow = cal.get(Calendar.DAY_OF_WEEK)
