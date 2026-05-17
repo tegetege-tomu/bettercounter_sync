@@ -86,7 +86,7 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/goalInputBox"
-            android:layout_weight="1.3"
+            android:layout_weight="1.25"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:hintAnimationEnabled="false"
