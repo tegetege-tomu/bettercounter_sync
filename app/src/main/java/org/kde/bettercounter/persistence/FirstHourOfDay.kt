@@ -19,7 +19,7 @@ object FirstHourOfDay {
         }
     }
 
-    fun get(): Int = prefs.getInt(FIRST_HOUR_OF_DAY_KEY, 0)
+    fun get(): Int = if (::prefs.isInitialized) prefs.getInt(FIRST_HOUR_OF_DAY_KEY, 0) else 0
 
     private const val SHARED_PREFS_NAME = "prefs"
     private const val FIRST_HOUR_OF_DAY_KEY = "first_hour_of_day"

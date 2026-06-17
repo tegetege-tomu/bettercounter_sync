@@ -16,7 +16,9 @@ import org.kde.bettercounter.boilerplate.CreateFileParams
 import org.kde.bettercounter.boilerplate.CreateFileResultContract
 import org.kde.bettercounter.databinding.ActivitySettingsBinding
 import org.kde.bettercounter.persistence.AverageMode
+import org.kde.bettercounter.persistence.FirstDayOfWeek
 import org.kde.bettercounter.persistence.FirstHourOfDay
+import java.text.DateFormatSymbols
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -28,7 +30,10 @@ class SettingsActivity : AppCompatActivity() {
     private val binding: ActivitySettingsBinding by lazy { ActivitySettingsBinding.inflate(layoutInflater) }
 
     private val hoursFormatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
-    private val hoursOfDay =  (0..23).map { LocalTime.of(it, 0).format(hoursFormatter) }.toTypedArray()
+    private val hoursOfDay = (0..23).map { LocalTime.of(it, 0).format(hoursFormatter) }.toTypedArray()
+
+    // DateFormatSymbols.weekdays is indexed [0..7], with 0 unused, 1=Sunday … 7=Saturday
+    private val weekdayNames = DateFormatSymbols().weekdays.drop(1).toTypedArray()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,6 +75,25 @@ class SettingsActivity : AppCompatActivity() {
         }
         updateFirstHourOfDayText()
 
+        // First day of week
+        binding.buttonChangeFirstDayOfWeek.setOnClickListener {
+            // FirstDayOfWeek stores a Calendar.DAY_OF_WEEK constant (1=Sun … 7=Sat).
+            // weekdayNames is indexed 0-based (0=Sun … 6=Sat), so we subtract 1.
+            var currentSelection = FirstDayOfWeek.get() - 1
+            val builder = MaterialAlertDialogBuilder(this)
+            builder.setTitle(R.string.first_day_of_week_title)
+            builder.setNegativeButton(R.string.cancel, null)
+            builder.setPositiveButton(R.string.save) { _, _ ->
+                FirstDayOfWeek.set(currentSelection + 1)
+                updateFirstDayOfWeekText()
+            }
+            builder.setSingleChoiceItems(weekdayNames, currentSelection) { _, selection ->
+                currentSelection = selection
+            }
+            builder.show()
+        }
+        updateFirstDayOfWeekText()
+
         // Average calculation mode
         when (viewModel.getAverageCalculationMode()) {
             AverageMode.FIRST_TO_NOW -> binding.radioFirstToNow.isChecked = true
@@ -90,6 +114,11 @@ class SettingsActivity : AppCompatActivity() {
         val hour = FirstHourOfDay.get()
         val formattedHour = LocalTime.of(hour, 0).format(hoursFormatter)
         binding.textFirstHourOfDay.text = getString(R.string.first_hour_of_day_text, formattedHour)
+    }
+
+    private fun updateFirstDayOfWeekText() {
+        val dayName = weekdayNames[FirstDayOfWeek.get() - 1]
+        binding.textFirstDayOfWeek.text = getString(R.string.first_day_of_week_text, dayName)
     }
 
     private fun updateAutoExportFileButtonVisibility(autoExportEnabled: Boolean) {

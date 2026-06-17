@@ -1,5 +1,6 @@
 package org.kde.bettercounter.extensions
 
+import org.kde.bettercounter.persistence.FirstDayOfWeek
 import org.kde.bettercounter.persistence.FirstHourOfDay
 import org.kde.bettercounter.persistence.Interval
 import java.text.SimpleDateFormat
@@ -21,6 +22,7 @@ fun Calendar.truncated(field: Int): Calendar {
     if (field in listOf(Calendar.DATE, Calendar.DAY_OF_WEEK, Calendar.DAY_OF_MONTH, Calendar.DAY_OF_YEAR)) return cal
     if (field in listOf(Calendar.WEEK_OF_YEAR, Calendar.WEEK_OF_MONTH)) {
         val dow = cal.get(Calendar.DAY_OF_WEEK)
+        val firstDayOfWeek = FirstDayOfWeek.get()
         val offset = if (dow < firstDayOfWeek) 7 - (firstDayOfWeek - dow) else dow - firstDayOfWeek
         cal.add(Calendar.DAY_OF_MONTH, -offset)
         return cal

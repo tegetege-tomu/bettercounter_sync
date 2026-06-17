@@ -71,4 +71,6 @@
     <string name="search">Filter</string>
     <string name="first_hour_of_day_title">First Hour of Day</string>
     <string name="first_hour_of_day_text">The day starts at %s</string>
+    <string name="first_day_of_week_title">First Day of Week</string>
+    <string name="first_day_of_week_text">The week starts on %s</string>
 </resources>
