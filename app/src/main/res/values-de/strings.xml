@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">BetterCounter</string>
+    <string name="app_name">BetterBetterCounter</string>
     <string name="name_cant_be_blank">Geben Sie dem Zähler einen Namen</string>
     <string name="already_exists">Ein Zähler mit diesem Namen existiert bereits</string>
     <string name="counter_name">Zählername</string>

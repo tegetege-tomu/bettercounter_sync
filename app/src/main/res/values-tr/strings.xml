@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">BetterCounter</string>
+    <string name="app_name">BetterBetterCounter</string>
     <string name="name_cant_be_blank">Sayaca bir ad ver</string>
     <string name="already_exists">Bu ada sahip bir sayaç zaten mevcut</string>
     <string name="counter_name">Sayaç adı</string>

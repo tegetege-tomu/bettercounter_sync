@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">BetterCounter</string>
+    <string name="app_name">BetterBetterCounter</string>
     <string name="name_cant_be_blank">Укажите название счетчика</string>
     <string name="already_exists">Счетчик с таким именем уже существует</string>
     <string name="counter_name">Имя счетчика</string>

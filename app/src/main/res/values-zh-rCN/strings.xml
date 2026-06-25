@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">BetterCounter</string>
+    <string name="app_name">BetterBetterCounter</string>
     <string name="name_cant_be_blank">为计数器设置一个名称吧</string>
     <string name="already_exists">这个名称的计数器已经存在了</string>
     <string name="counter_name">计数器名称</string>

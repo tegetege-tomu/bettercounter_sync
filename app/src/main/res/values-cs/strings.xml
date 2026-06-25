@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">BetterCounter</string>
+    <string name="app_name">BetterBetterCounter</string>
     <string name="name_cant_be_blank">Zadat název počítadla</string>
     <string name="already_exists">Počítadlo s tímto názvem již existuje</string>
     <string name="counter_name">Název počítadla</string>

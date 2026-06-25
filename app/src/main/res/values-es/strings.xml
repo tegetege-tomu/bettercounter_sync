@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">BetterCounter</string>
+    <string name="app_name">BetterBetterCounter</string>
     <string name="name_cant_be_blank">El nombre no puede estar vacío</string>
     <string name="already_exists">Ya existe un contador con este nombre</string>
     <string name="counter_name">Nombre del contador</string>
