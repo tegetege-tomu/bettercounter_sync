@@ -22,7 +22,7 @@ android {
     namespace = "org.kde.bettercounter"
     compileSdk = 36
     defaultConfig {
-        applicationId = "org.kde.bettercounter"
+        applicationId = "com.betterbettercounter"
         minSdk = 21
         targetSdk = 36
         versionCode = 60003
