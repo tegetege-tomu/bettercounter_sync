@@ -53,6 +53,12 @@ android {
             keyAlias = "androiddebugkey"
             keyPassword = "android"
         }
+        create("release") {
+            storeFile = file("release.keystore")
+            storePassword = "bettercounter2024"
+            keyAlias = "bettercounter"
+            keyPassword = "bettercounter2024"
+        }
     }
     buildTypes {
         getByName("debug") {
@@ -61,6 +67,7 @@ android {
             versionNameSuffix = " Dev"
         }
         getByName("release") {
+            signingConfig = signingConfigs.getByName("release")
             isShrinkResources = true
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
