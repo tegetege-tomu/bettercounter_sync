@@ -73,4 +73,15 @@
     <string name="first_hour_of_day_text">The day starts at %s</string>
     <string name="first_day_of_week_title">First Day of Week</string>
     <string name="first_day_of_week_text">The week starts on %s</string>
+    <string name="sync_settings">WebDAV Sync</string>
+    <string name="enable_webdav_sync">Sync data with a WebDAV server</string>
+    <string name="webdav_url_hint">Server URL (e.g. https://192.168.1.10/dav)</string>
+    <string name="webdav_username_hint">Username</string>
+    <string name="webdav_password_hint">Password</string>
+    <string name="webdav_remote_path_hint">Remote file (e.g. bettercounter.csv)</string>
+    <string name="test_connection">Test connection</string>
+    <string name="sync_test_success">Connection successful</string>
+    <string name="sync_test_failed">Failed: %s</string>
+    <string name="sync_error">Sync failed: %s</string>
+    <string name="sync_retry">Retry</string>
 </resources>

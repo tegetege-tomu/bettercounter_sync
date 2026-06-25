@@ -11,6 +11,7 @@ androidDesugarJdkLibs = "2.1.5"
 simpleTooltip = "1.1.0"
 mpAndroidChart = "3.1.0.31"
 junit = "4.13.2"
+okhttp = "4.12.0"
 
 [libraries]
 android-gradlePlugin = { module = "com.android.tools.build:gradle", version.ref = "androidGradlePlugin" }
@@ -26,6 +27,7 @@ android-desugarJdkLibs = { module = "com.android.tools:desugar_jdk_libs", versio
 douglasjunior-android-simple-tooltip = { module = "com.github.douglasjunior:android-simple-tooltip", version.ref = "simpleTooltip" }
 appdevnext-mpAndroidChart = { module = "com.github.AppDevNext:AndroidChart", version.ref = "mpAndroidChart" }
 junit = { module = "junit:junit", version.ref = "junit" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }

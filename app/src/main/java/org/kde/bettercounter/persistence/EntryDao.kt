@@ -40,6 +40,9 @@ interface EntryDao {
     @Query("SELECT * FROM entry WHERE name = (:name) ORDER BY date ASC")
     suspend fun getAllEntriesSortedByDate(name: String): List<Entry>
 
+    @Query("SELECT * FROM entry ORDER BY name ASC, date ASC")
+    suspend fun getAllEntries(): List<Entry>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entry: Entry)
 

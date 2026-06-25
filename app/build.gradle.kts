@@ -79,6 +79,8 @@ dependencies {
     implementation(libs.androidx.recyclerview)
     implementation(libs.material)
 
+    implementation(libs.okhttp)
+
     coreLibraryDesugaring(libs.android.desugarJdkLibs) // Chrono.UNITS for Android < 26
     testImplementation(libs.junit)
 }

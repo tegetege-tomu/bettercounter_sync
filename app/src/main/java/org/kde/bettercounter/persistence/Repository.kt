@@ -8,10 +8,16 @@ import org.kde.bettercounter.boilerplate.AppDatabase
 import org.kde.bettercounter.boilerplate.Converters
 import org.kde.bettercounter.extensions.plusInterval
 import org.kde.bettercounter.extensions.truncated
+import org.kde.bettercounter.sync.WebDavConfig
 import java.util.Calendar
 import java.util.Date
 
 const val COUNTERS_PREFS_KEY = "counters"
+const val WEBDAV_SYNC_ENABLED_KEY = "webdav_sync_enabled"
+const val WEBDAV_URL_KEY = "webdav_url"
+const val WEBDAV_USERNAME_KEY = "webdav_username"
+const val WEBDAV_PASSWORD_KEY = "webdav_password"
+const val WEBDAV_REMOTE_PATH_KEY = "webdav_remote_path"
 const val COUNTERS_INTERVAL_PREFS_KEY = "interval.%s"
 const val COUNTERS_COLOR_PREFS_KEY = "color.%s"
 const val COUNTERS_GOAL_PREFS_KEY = "goal.%s"
@@ -136,6 +142,25 @@ class Repository(
 
     suspend fun bulkAddEntries(entries: List<Entry>) {
         entryDao.bulkInsert(entries)
+    }
+
+    suspend fun getAllEntries(): List<Entry> = entryDao.getAllEntries()
+
+    fun isWebDavSyncEnabled(): Boolean = sharedPref.getBoolean(WEBDAV_SYNC_ENABLED_KEY, false)
+    fun setWebDavSyncEnabled(enabled: Boolean) = sharedPref.edit { putBoolean(WEBDAV_SYNC_ENABLED_KEY, enabled) }
+    fun getWebDavUrl(): String = sharedPref.getString(WEBDAV_URL_KEY, "") ?: ""
+    fun setWebDavUrl(url: String) = sharedPref.edit { putString(WEBDAV_URL_KEY, url) }
+    fun getWebDavUsername(): String = sharedPref.getString(WEBDAV_USERNAME_KEY, "") ?: ""
+    fun setWebDavUsername(username: String) = sharedPref.edit { putString(WEBDAV_USERNAME_KEY, username) }
+    fun getWebDavPassword(): String = sharedPref.getString(WEBDAV_PASSWORD_KEY, "") ?: ""
+    fun setWebDavPassword(password: String) = sharedPref.edit { putString(WEBDAV_PASSWORD_KEY, password) }
+    fun getWebDavRemotePath(): String = sharedPref.getString(WEBDAV_REMOTE_PATH_KEY, "bettercounter.csv") ?: "bettercounter.csv"
+    fun setWebDavRemotePath(path: String) = sharedPref.edit { putString(WEBDAV_REMOTE_PATH_KEY, path) }
+
+    fun getWebDavConfig(): WebDavConfig? {
+        val url = getWebDavUrl()
+        if (url.isBlank()) return null
+        return WebDavConfig(url, getWebDavUsername(), getWebDavPassword(), getWebDavRemotePath())
     }
 
     fun getTutorialsShown() : Set<String> {

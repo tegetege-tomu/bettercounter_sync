@@ -30,6 +30,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import io.github.douglasjunior.androidSimpleTooltip.SimpleTooltip
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.kde.bettercounter.R
 import org.kde.bettercounter.boilerplate.CreateFileParams
@@ -211,12 +212,46 @@ class MainActivity : AppCompatActivity() {
 
         LocalBroadcastManager.getInstance(this)
             .registerReceiver(broadcastReceiver, IntentFilter(ACTION_REFRESH_COUNTER))
+
+        lifecycleScope.launch {
+            viewModel.syncState.collect { state ->
+                if (state is SyncState.Error) {
+                    showSyncError(state.message)
+                }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.syncOnStartup()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        viewModel.uploadOnClose()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         LocalBroadcastManager.getInstance(this)
             .unregisterReceiver(broadcastReceiver)
+    }
+
+    private fun showSyncError(message: String) {
+        Snackbar.make(binding.root, getString(R.string.sync_error, message), Snackbar.LENGTH_INDEFINITE)
+            .setAction(R.string.sync_retry) {
+                viewModel.syncOnStartup()
+            }
+            .addCallback(object : Snackbar.Callback() {
+                override fun onDismissed(snackbar: Snackbar, event: Int) {
+                    if (event != DISMISS_EVENT_ACTION) {
+                        // Swiped away — work offline for this session
+                        viewModel.syncOfflineMode = true
+                    }
+                }
+            })
+            .show()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -270,6 +305,9 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             viewModel.refreshAllCounters()
         }
+        // Allow a fresh sync attempt in case WebDAV settings changed
+        viewModel.resetSyncSession()
+        viewModel.syncOnStartup()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

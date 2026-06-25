@@ -27,11 +27,20 @@ import org.kde.bettercounter.persistence.Exporter
 import org.kde.bettercounter.persistence.Interval
 import org.kde.bettercounter.persistence.Repository
 import org.kde.bettercounter.persistence.Tutorial
+import org.kde.bettercounter.sync.WebDavSyncer
 import org.kde.bettercounter.ui.widget.WidgetProvider
+import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.Calendar
 import java.util.Date
+
+sealed class SyncState {
+    object Idle : SyncState()
+    object Syncing : SyncState()
+    object Success : SyncState()
+    data class Error(val message: String) : SyncState()
+}
 
 const val alwaysShowTutorialsInDebugBuilds = false
 
@@ -48,7 +57,13 @@ class MainActivityViewModel(val application: Application) {
     }
 
     private val repo: Repository = Repository.create(application)
-    private val exporter: Exporter  = Exporter(application, repo)
+    private val exporter: Exporter = Exporter(application, repo)
+    private val syncer = WebDavSyncer()
+
+    private val _syncState = MutableStateFlow<SyncState>(SyncState.Idle)
+    val syncState: StateFlow<SyncState> = _syncState
+    private var syncDoneThisSession = false
+    var syncOfflineMode = false
 
     private var counters: List<String>
     private val counterObservers = HashSet<CounterObserver>()
@@ -240,6 +255,78 @@ class MainActivityViewModel(val application: Application) {
         repo.setCounterList(counters)
         exporter.autoExportIfEnabled()
         WidgetProvider.removeWidgets(application, name)
+    }
+
+    fun resetSyncSession() {
+        syncDoneThisSession = false
+        _syncState.value = SyncState.Idle
+    }
+
+    fun syncOnStartup() {
+        if (syncDoneThisSession || syncOfflineMode) return
+        if (!repo.isWebDavSyncEnabled()) return
+        syncDoneThisSession = true
+        CoroutineScope(Dispatchers.IO).launch {
+            _syncState.value = SyncState.Syncing
+            try {
+                val config = repo.getWebDavConfig() ?: run {
+                    _syncState.value = SyncState.Idle
+                    return@launch
+                }
+                val remoteContent = syncer.download(config)
+                if (remoteContent != null) {
+                    mergeRemoteContent(remoteContent)
+                }
+                val exportContent = buildExportString()
+                syncer.upload(config, exportContent)
+                refreshAllCounters()
+                _syncState.value = SyncState.Success
+            } catch (e: Exception) {
+                syncDoneThisSession = false  // allow retry
+                _syncState.value = SyncState.Error(e.message ?: "Sync failed")
+            }
+        }
+    }
+
+    fun uploadOnClose() {
+        if (!repo.isWebDavSyncEnabled() || syncOfflineMode) return
+        val config = repo.getWebDavConfig() ?: return
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val content = buildExportString()
+                syncer.upload(config, content)
+            } catch (_: Exception) {
+                // Silent failure on close — user is leaving the app
+            }
+        }
+    }
+
+    private suspend fun mergeRemoteContent(content: String) {
+        val remoteNames = mutableListOf<String>()
+        val remoteEntries = mutableListOf<Entry>()
+        content.lineSequence().filter { it.isNotBlank() }.forEach { line ->
+            parseImportLine(line, remoteNames, remoteEntries)
+        }
+        val allLocalEntries = repo.getAllEntries()
+        val localSet = allLocalEntries.mapTo(HashSet()) { it.name to it.date.time }
+        val newEntries = remoteEntries.filter { (it.name to it.date.time) !in localSet }
+        if (newEntries.isNotEmpty()) {
+            repo.bulkAddEntries(newEntries)
+        }
+        val defaultColor = CounterColors.getInstance(application).defaultColor
+        val reusedMeta = CounterMetadata("", Interval.DEFAULT, 0, defaultColor)
+        for (name in remoteNames) {
+            if (!counterExists(name)) {
+                reusedMeta.name = name
+                addCounter(reusedMeta)
+            }
+        }
+    }
+
+    private suspend fun buildExportString(): String {
+        val baos = ByteArrayOutputStream()
+        exporter.exportAll(baos) { }
+        return baos.toString(Charsets.UTF_8.name())
     }
 
     fun getEntriesForRangeSortedByDate(name: String, since: Date, until: Date) = flow {

@@ -4,6 +4,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.MenuItem
 import android.view.View
 import androidx.activity.result.ActivityResultLauncher
@@ -108,6 +110,49 @@ class SettingsActivity : AppCompatActivity() {
             }
             viewModel.setAverageCalculationMode(mode)
         }
+
+        // WebDAV sync
+        binding.switchWebDavSync.isChecked = viewModel.isWebDavSyncEnabled()
+        binding.switchWebDavSync.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.setWebDavSyncEnabled(isChecked)
+            updateWebDavConfigVisibility(isChecked)
+        }
+        binding.editWebDavUrl.setText(viewModel.getWebDavUrl())
+        binding.editWebDavUsername.setText(viewModel.getWebDavUsername())
+        binding.editWebDavPassword.setText(viewModel.getWebDavPassword())
+        binding.editWebDavRemotePath.setText(viewModel.getWebDavRemotePath())
+        binding.editWebDavUrl.addTextChangedListener(saveOnChange { viewModel.setWebDavUrl(it) })
+        binding.editWebDavUsername.addTextChangedListener(saveOnChange { viewModel.setWebDavUsername(it) })
+        binding.editWebDavPassword.addTextChangedListener(saveOnChange { viewModel.setWebDavPassword(it) })
+        binding.editWebDavRemotePath.addTextChangedListener(saveOnChange { viewModel.setWebDavRemotePath(it) })
+        binding.buttonTestSync.setOnClickListener {
+            // Save current field values before testing
+            viewModel.setWebDavUrl(binding.editWebDavUrl.text.toString())
+            viewModel.setWebDavUsername(binding.editWebDavUsername.text.toString())
+            viewModel.setWebDavPassword(binding.editWebDavPassword.text.toString())
+            viewModel.setWebDavRemotePath(binding.editWebDavRemotePath.text.toString())
+            binding.textSyncTestResult.text = getString(R.string.test_connection) + "…"
+            binding.buttonTestSync.isEnabled = false
+            viewModel.testWebDavConnection { success, message ->
+                binding.buttonTestSync.isEnabled = true
+                binding.textSyncTestResult.text = if (success) {
+                    getString(R.string.sync_test_success)
+                } else {
+                    getString(R.string.sync_test_failed, message)
+                }
+            }
+        }
+        updateWebDavConfigVisibility(binding.switchWebDavSync.isChecked)
+    }
+
+    private fun saveOnChange(save: (String) -> Unit) = object : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        override fun afterTextChanged(s: Editable?) { save(s.toString()) }
+    }
+
+    private fun updateWebDavConfigVisibility(syncEnabled: Boolean) {
+        binding.layoutWebDavConfig.visibility = if (syncEnabled) View.VISIBLE else View.GONE
     }
 
     private fun updateFirstHourOfDayText() {
